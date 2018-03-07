@@ -15,3 +15,20 @@ It output 2 lines:
 
 * [crypto++ library](https://www.cryptopp.com)
 * [g++ compiler](https://gcc.gnu.org)
+
+## How to compile
+
+```console
+g++ -g3 -O2 -Wall -Wextra -o gen_priv_pub gen_priv_pub.cpp -L/usr/local/lib -lcryptopp
+```
+
+## How to run
+
+Make sure you add library in your path with
+
+```console
+LD_LIBRARY_PATH=/usr/local/lib
+export LD_LIBRARY_PATH
+
+./gen_priv_pub
+```

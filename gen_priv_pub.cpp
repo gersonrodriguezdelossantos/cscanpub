@@ -55,12 +55,5 @@ int main()
   // cout << std::bitset << qx;
   // cout << std::bitset << qy << endl;
 
-  // bool result = privateKey.Validate( prng, 3 );
-  //
-  // if( !result ) {
-  //   const Integer& x = privateKey.GetPrivateExponent();
-  //   cout << x;
-  // }
-
 
 }
