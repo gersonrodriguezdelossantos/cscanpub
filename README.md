@@ -35,4 +35,7 @@ export LD_LIBRARY_PATH
 ## openssl observ format
 
 To generate a sec256p1 with openssl, the equivalent curve within openssl is prime256v1
+
+```console
 openssl ecparam -name prime256v1 -genkey -noout -out thesuperprime.pem 
+```
