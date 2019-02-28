@@ -7,15 +7,15 @@ RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/main" > /etc/apk/repositorie
 RUN apk update 
 
 RUN apk add --no-cache --update build-base g++ bash crypto++ && \
-  rm -rf /var/cache/apk/* && \
-  LD_LIBRARY_PATH=/usr/local/lib && \
-  export LD_LIBRARY_PATH
+  rm -rf /var/cache/apk/* 
 
-#RUN build.sh
+ENV LD_LIBRARY_PATH /usr/local/lib
+
+COPY . /
+RUN /build.sh
 
 FROM alpinecrypto
 
-RUN LD_LIBRARY_PATH=/usr/local/lib && \
-export LD_LIBRARY_PATH
-WORKDIR /cscanpub
-CMD ./cscanpub/dist/gen_priv_pub
+ENV LD_LIBRARY_PATH /usr/local/lib
+
+CMD ./gen_priv_pub
