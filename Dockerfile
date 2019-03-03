@@ -6,7 +6,7 @@ RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/main" > /etc/apk/repositorie
 
 RUN apk update 
 
-RUN apk add --no-cache --update build-base g++ bash crypto++ && \
+RUN apk add --no-cache --update build-base g++ bash crypto++ crypto++-dev && \
   rm -rf /var/cache/apk/* 
 
 ENV LD_LIBRARY_PATH /usr/local/lib
