@@ -34,7 +34,7 @@ int main()
   cout << "exp " << std::hex << x << endl;
 
   // const Integer& publickKey = 0;
-  ECDSA<ECP, SHA512>::PublicKey publicKey;
+  ECDSA<ECP, SHA256>::PublicKey publicKey;
   // en binario en binario!!! XD
   // ECDSA<EC2N, SHA512>::PublicKey publicKey;
 

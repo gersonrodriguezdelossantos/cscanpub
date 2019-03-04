@@ -10,7 +10,7 @@
 
 using namespace std;
 
-bool checkKeys(ECDSA<ECP, SHA256>::PrivateKey &privateKey,ECDSA<ECP, SHA512>::PublicKey &publicKey)
+bool checkKeys(ECDSA<ECP, SHA256>::PrivateKey &privateKey,ECDSA<ECP, SHA256>::PublicKey &publicKey)
 {
 
 	const Integer& x = privateKey.GetPrivateExponent();
@@ -34,6 +34,90 @@ const ECP::Point& q = publicKey.GetPublicElement();
 
     cout << "Public Key X: " << std::hex << qx  << endl;
     cout << "Public Key Y: " << std::hex << qy  << endl;
+
+    ECDSA<ECP, SHA256>::Signer signer(privateKey);
+
+    string message = "Yoda said, Do or do not. There is no try.";
+    string signature;
+
+    AutoSeededRandomPool prng;
+//No funciona
+/*
+    StringSink ssink( signature );
+    SignerFilter sf( prng, signer, ssink);
+    StringSource ss(message,true,sf);
+*/
+
+StringSource s( message, true /*pump all*/,
+    new SignerFilter( prng,
+        signer,
+        new StringSink( signature )
+    ) // SignerFilter
+); // StringSource
+
+    cout << "SIGNATURE: " << std::hex << signature << endl;
+
+
+//####################### VERIFICATION #############
+
+ECDSA<ECP,SHA256>::Verifier verifier(publicKey);
+
+cout << "SIGNATURE LENGTH " << signature.length() << endl;
+string falseSignature(signature.length(),'g');
+cout << "FALSE SIGNATURE: " << falseSignature << endl;
+bool result = false;
+
+StringSource ss1( falseSignature+message, true /*pump all*/,
+    new SignatureVerificationFilter(
+        verifier,
+        new ArraySink( (byte*)&result, sizeof(result) )
+    ) // SignatureVerificationFilter
+);
+
+if(result)
+{
+    cout << "SUCCESS" << endl;
+}
+else
+{
+    cout << "FAIL" << endl;
+}
+
+string falseMessage = "yoda said, Do or do not. There is no try.";
+StringSource ss2( signature+falseMessage, true /*pump all*/,
+    new SignatureVerificationFilter(
+        verifier,
+        new ArraySink( (byte*)&result, sizeof(result) )
+    ) // SignatureVerificationFilter
+);
+
+if(result)
+{
+    cout << "SUCCESS" << endl;
+}
+else
+{
+    cout << "FAIL" << endl;
+}
+
+
+StringSource ss3( signature+message, true /*pump all*/,
+    new SignatureVerificationFilter(
+        verifier,
+        new ArraySink( (byte*)&result, sizeof(result) )
+    ) // SignatureVerificationFilter
+);
+
+if(result)
+{
+    cout << "SUCCESS" << endl;
+}
+else
+{
+    cout << "FAIL" << endl;
+}
+
+
 
 
 
