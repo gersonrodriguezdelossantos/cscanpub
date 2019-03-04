@@ -28,7 +28,7 @@ int main()
 
   const Integer& x = privateKey.GetPrivateExponent();
 
-  cout << std::hex << x << endl;
+  cout << "exp " << std::hex << x << endl;
 
   // const Integer& publickKey = 0;
   ECDSA<ECP, SHA512>::PublicKey publicKey;
@@ -49,8 +49,8 @@ int main()
   // const std::bitset <256> qx = q.x;
   // const std::bitset <256> qy = q.y;
 
-  cout << std::hex << qx;
-  cout << std::hex << qy << endl;
+  cout << "q.x " << std::hex << qx << endl;
+  cout << "q.y " << std::hex << qy << endl;
   // en binario en binario!!! XD
   // cout << std::bitset << qx;
   // cout << std::bitset << qy << endl;
