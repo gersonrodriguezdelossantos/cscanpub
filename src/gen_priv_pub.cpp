@@ -58,6 +58,14 @@ int main()
   // cout << std::bitset << qx;
   // cout << std::bitset << qy << endl;
 
-  checkKeys(privateKey,publicKey);
+  if(checkSignature(privateKey,publicKey))
+  {
+    cout << "Keys are mathematically correlated, signature matches!!" << endl;
+  }
+  else
+  {
+    cout << "Keys are not mathematically correlated, signature does not match!!" << endl;
+  }
+  
 
 }
