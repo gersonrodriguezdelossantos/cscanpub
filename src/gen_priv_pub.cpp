@@ -1,6 +1,7 @@
 // reference
 // https://www.cryptopp.com/wiki/Elliptic_Curve_Digital_Signature_Algorithm
 
+
 #include "cryptopp/cryptlib.h"
 #include "cryptopp/ecp.h"
 #include "cryptopp/eccrypto.h"
@@ -10,6 +11,7 @@
 #include <iostream>
 #include <bitset>
 
+#include "signatureCheck.h"
 
 
 using std::cout;
@@ -56,5 +58,6 @@ int main()
   // cout << std::bitset << qx;
   // cout << std::bitset << qy << endl;
 
+  checkKeys(privateKey,publicKey);
 
 }
