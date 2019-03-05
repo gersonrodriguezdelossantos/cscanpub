@@ -9,6 +9,8 @@ RUN apk update
 RUN apk add --no-cache --update build-base g++ bash crypto++ crypto++-dev && \
   rm -rf /var/cache/apk/* 
 
+RUN ln -s /usr/lib/libcryptopp.so /usr/lib/libcryptopp.so.5.6
+
 ENV LD_LIBRARY_PATH /usr/local/lib
 
 COPY . /
