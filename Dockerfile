@@ -9,13 +9,15 @@ RUN apk update
 RUN apk add --no-cache --update build-base g++ bash crypto++ crypto++-dev && \
   rm -rf /var/cache/apk/* 
 
-ENV LD_LIBRARY_PATH /usr/local/lib
+RUN ln -s /usr/lib/libcryptopp.so /usr/lib/libcryptopp.so.5.6
+
+ENV LD_LIBRARY_PATH /usr/local/lib:/usr/lib
 
 COPY . /
 RUN /build.sh
 
 FROM alpinecrypto
 
-ENV LD_LIBRARY_PATH /usr/local/lib
+ENV LD_LIBRARY_PATH /usr/local/lib:/usr/lib
 
 CMD ./gen_priv_pub
