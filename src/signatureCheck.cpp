@@ -1,14 +1,10 @@
-#include "cryptopp/cryptlib.h"
-#include "cryptopp/ecp.h"
-#include "cryptopp/eccrypto.h"
-#include "cryptopp/sha.h"
-#include "cryptopp/osrng.h"
-#include "cryptopp/oids.h"
+
 #include <iostream>
 
 #include "signatureCheck.h"
 
 using namespace std;
+
 
 bool checkSignature(ECDSA<ECP, SHA256>::PrivateKey &privateKey,ECDSA<ECP, SHA256>::PublicKey &publicKey)
 {
