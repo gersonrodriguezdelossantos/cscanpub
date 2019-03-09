@@ -22,6 +22,11 @@ It output 2 lines:
 g++ -g3 -O2 -Wall -Wextra -o gen_priv_pub gen_priv_pub.cpp -L/usr/local/lib -lcryptopp
 ```
 
+### Build within Docker (Alpine base image, and docker multistage build ready)
+```
+docker build . -t cscanpub
+```
+
 ## How to run
 
 Make sure you add library in your path with
@@ -32,7 +37,15 @@ export LD_LIBRARY_PATH
 
 ./gen_priv_pub
 ```
+
+### Run within Docker
+```
+docker run cscanpub
+```
 ## openssl observ format
 
 To generate a sec256p1 with openssl, the equivalent curve within openssl is prime256v1
+```
 openssl ecparam -name prime256v1 -genkey -noout -out thesuperprime.pem 
+```
+
