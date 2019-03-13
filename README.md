@@ -21,6 +21,10 @@ It output 2 lines:
 ```console
 g++ -g3 -O2 -Wall -Wextra -o gen_priv_pub gen_priv_pub.cpp -L/usr/local/lib -lcryptopp
 ```
+### cross compiling for arm (require install g++-arm-linux-gnueabi package) 
+```console
+arm-linux-gnueabi-g++ -o gen_priv_pub_arm src/gen_priv_pub.cpp src/signatureCheck.cpp -L/usr/local/lib -lcryptopp -I/usr/local/include
+```
 
 ## How to run
 
