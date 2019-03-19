@@ -33,7 +33,7 @@ char **scrapBTCAddresses(char *text, int *resultLength, int *resultCode, int deb
     {
         printf("Input string is \n%s.\nRegex pattern is %s\nString length is %lu\n",text,regexPattern,strlen(text));
     }
-    
+
     //Compile the regex
     returnedCode = regcomp(&regex,regexPattern,REG_EXTENDED);
     if (returnedCode)
@@ -98,8 +98,8 @@ char **scrapBTCAddresses(char *text, int *resultLength, int *resultCode, int deb
             //If there is a match, then we copy the string
             if(debug)
             {
-                printf("rm_so is %lld and rm_eo is %lld\n",occurrences.rm_so,occurrences.rm_eo);
-                printf("Match goes from index %lld to index %lld\n", currentPosition-text+occurrences.rm_so, currentPosition-text+occurrences.rm_eo-1);
+                printf("rm_so is %ld and rm_eo is %ld\n",occurrences.rm_so,occurrences.rm_eo);
+                printf("Match goes from index %ld to index %ld\n", currentPosition-text+occurrences.rm_so, currentPosition-text+occurrences.rm_eo-1);
             }
 
             //If we have already filled the array with results, we need to enlarge it taking MAX_RESULTS as the block size
@@ -136,7 +136,7 @@ char **scrapBTCAddresses(char *text, int *resultLength, int *resultCode, int deb
 
             //Length of BTC address
             int addressLength = occurrences.rm_eo-occurrences.rm_so;
-            //Allocate memory for the address. Remember that we need to allocate one extra byt for \0!!! 
+            //Allocate memory for the address. Remember that we need to allocate one extra byt for \0!!!
             char *address = calloc(addressLength+1,sizeof(char));
             //Copy the string to the result array.
             memcpy(address,currentPosition+occurrences.rm_so,addressLength);
@@ -146,7 +146,7 @@ char **scrapBTCAddresses(char *text, int *resultLength, int *resultCode, int deb
             returnedIndex++;
 
 
-            
+
             if(debug)
             {
                 //.*s indicates that we take a Number N=* of characters from the string. N is given by the second argument of the printf function and the string from where we take the N characters is the third argument.
@@ -155,7 +155,7 @@ char **scrapBTCAddresses(char *text, int *resultLength, int *resultCode, int deb
             }
 
         }
-        
+
         if(debug)
         {
             printf("Current String is %s\n",currentPosition);
@@ -171,7 +171,7 @@ char **scrapBTCAddresses(char *text, int *resultLength, int *resultCode, int deb
         }
 
     } while( !returnedCode && (currentPosition - text) < strlen(text) );
-    
+
     //Free allocated memory for the compiled regex
     regfree(&regex);
 
@@ -182,4 +182,3 @@ char **scrapBTCAddresses(char *text, int *resultLength, int *resultCode, int deb
     *resultLength = returnedIndex;
     return returnedValues;
 }
-
