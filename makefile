@@ -1,6 +1,6 @@
 CC=gcc
 GG=g++
-GGFLAGS=-L/usr/local/lib -lcryptopp -I/usr/local/include
+GGFLAGS=-L/usr/local/lib -lcryptopp -lpthread -I/usr/local/include
 CCFLAGS=-I.
 DEPS = src/scraper.h
 
