@@ -22,7 +22,7 @@ using std::endl;
 extern "C"
 #endif
 
-#define NUM_THREADS 8
+#define NUM_THREADS 16
 
 void *generator(void*)
 {
