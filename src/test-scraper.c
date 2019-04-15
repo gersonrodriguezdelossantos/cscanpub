@@ -1,6 +1,9 @@
 #include <stdio.h>
+#include <string.h>
 
 #include "scraper.h"
+#include "httpClient.h"
+
 
 int main(int argc, char ** argv)
 {
@@ -17,7 +20,7 @@ int main(int argc, char ** argv)
 
 	struct sockaddr socketInfo;
 	int method = 0;
-	char URL[]="https://www.example.com";
+	char URL[]="https://www.google.es:443";
 	int extractResult = extractSocketInfoFromURL(&socketInfo, &method, URL, debug);
 
 	if(extractResult)
@@ -35,7 +38,7 @@ int main(int argc, char ** argv)
 
  SecureSocket *secureSocket;
 
-	secureSocket = openSecureSocket(method, socketInfo);
+	secureSocket = openSecureSocket(method, &socketInfo);
 
 	if(!secureSocket)
 	{
@@ -43,13 +46,13 @@ int main(int argc, char ** argv)
 		return -1;
 	}
 
-	SACAR LA PARTE DE RUTA DE LA URL DE LA DIRECCIÓN
-	char httpRequest = "GET ALGO\r\n\r\n";
-	int writeResult = writeToServer(secureSocket, httpRequest);
+	//SACAR LA PARTE DE RUTA DE LA URL DE LA DIRECCIÓN
+	char httpRequest [] = "GET /\r\n\r\n";
+	int writeResult = writeToServer(secureSocket, httpRequest,strlen(httpRequest));
 
 	if(writeResult < strlen(httpRequest))
 	{
-		VER SI ESTE ERROR REALMENTE SE PUEDE DAR.
+		//VER SI ESTE ERROR REALMENTE SE PUEDE DAR.
 	}
 
 	int maxDataLength = 10000;
@@ -59,8 +62,9 @@ int main(int argc, char ** argv)
 	int totalReadBytes = 0;
 	do
 	{
-		
+		printf("Reading from server...\n");
 		readResultLength = readFromServer(secureSocket, readData + totalReadBytes, maxDataLength);
+		printf("Reading from server returned...\n");
 		if(readResultLength < 0)
 		{
 			free(readData);
@@ -79,14 +83,15 @@ int main(int argc, char ** argv)
 			}
 		}
 	}
-	while(readResultLength < maxDataLength);
+	while(readResultLength == maxDataLength);
 
 	closeSecureSocket(secureSocket);
 
 	readData[totalReadBytes] = '\0'; //End the string with the null character. Remember we allocated
 	
 
-	printf("\n\n\n%s\n\n\n",);
+	printf("Printing web server response\n");
+	printf("\n\n\n%s\n\n\n",readData);
 
 
 	//char **returnedValues = scrapBTCAddresses(test,&resultLength,&resultCode,0);

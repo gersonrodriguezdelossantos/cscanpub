@@ -5,11 +5,11 @@ char *requestPage(char *URL);
 
 //Function to obtain a socket
 
-CAMBIARLO PARA QUE SEA SOCKADDR SIN MÁS, PORQUE PUEDE HABER VARIOS TIPOS DE DIRECCIÓN
+
 SecureSocket *openSecureSocket(int method, struct sockaddr *socketInfo)
 {
     //Sanity check
-    if( !socketInfo || (method != METHOD_NOTSECURE && method != METHOD_SECURE) )
+    if( !socketInfo || (method != INSECURE_METHOD && method != SECURE_METHOD) )
     {
         return NULL;
     }
@@ -17,7 +17,7 @@ SecureSocket *openSecureSocket(int method, struct sockaddr *socketInfo)
 
 	if(socketInfo -> sa_family != AF_INET && socketInfo -> sa_family != AF_INET6 )
 	{
-		return -1;
+		return NULL;
 	}
 
     //Allocate memory for Secure Socket structure
@@ -80,6 +80,7 @@ SecureSocket *openSecureSocket(int method, struct sockaddr *socketInfo)
     return secureSocket;
 }
 
+//Function to negotiate a secure SSL/TLS session for a socket
 int negotiateSecureSession(SecureSocket *secureSocket)
 {
         //Initialise SSL library
@@ -112,7 +113,7 @@ int negotiateSecureSession(SecureSocket *secureSocket)
         //sock = SSL_get_fd(ssl); //I think this line does nothing in the original example and therefore I am commenting it.
         
         //Associate the SSL structure to the socket created
-	int associateError = SSL_set_fd(secureSocket -> ssl, tcpSocket);
+		int associateError = SSL_set_fd(secureSocket -> ssl, secureSocket -> tcpSocket);
         if(!associateError)
 	{
 		//Free allocated resources
@@ -192,7 +193,7 @@ int writeToServer(SecureSocket *secureSocket, char *data, int dataLength)
         bytesWritten = SSL_write(secureSocket -> ssl, data, dataLength);
         if (bytesWritten < 0)
         {
-            int sslError = SSL_get_error(ssl, len);
+            int sslError = SSL_get_error(secureSocket -> ssl, bytesWritten);
             switch (sslError)
             {
                 case SSL_ERROR_WANT_WRITE:
@@ -236,7 +237,7 @@ int readFromServer(SecureSocket *secureSocket, char *data, int dataLength)
         bytesRead = SSL_read(secureSocket -> ssl, data, dataLength);
         if (bytesRead < 0)
         {
-            int sslError = SSL_get_error(ssl, len);
+            int sslError = SSL_get_error(secureSocket -> ssl, bytesRead);
             switch (sslError)
             {
                 case SSL_ERROR_WANT_WRITE:
@@ -295,18 +296,20 @@ http://www.bichito.com313
 
 */
 
-	char regexPattern[] = "http[s]*://(.*)/";
+	//char regexPattern[] = "http[s]*://(.*)/";
+	char regexPattern[] = "(http|https)://([a-zA-Z\\.0-9]+)(:[0-9]+)*[\\/]*";
 	//Otro patrón para cazar números de puerto: (http|https):\/\/([a-zA-Z\.0-9]+)(:[0-9]+)*[\/]*
 	//Quitando las secuencias de escape para las "/" queda: (http|https)://([a-zA-Z\.0-9]+)(:[0-9]+)*[/]*
 	int returnedCode = 0;
 
 	//Compile the regex
+	regex_t regex;
 	returnedCode = regcomp(&regex,regexPattern,REG_EXTENDED);
 	if (returnedCode)
 	{
 		if(debug)
 		{
-		    fprintf(stderr, "Cannot compile regex!!\n");
+		    printf(stderr, "Cannot compile URL regex!!\n");
 		}
 		return -1;
 	}
@@ -314,14 +317,14 @@ http://www.bichito.com313
 	{
 		if(debug)
 		{
-		    printf("Regex compilation returned SUCCESS!!\n");
+		    printf("URL Regex compilation returned SUCCESS!!\n");
 		}
 	}
 	//Structure to store occurrences of the regex
-	regmatch_t occurrences[2];
+	regmatch_t occurrences[4];
 
 	//Find a substring that matches the regex
-	returnedCode = regexec(&regex, URL, 2, &occurrences, 0);
+	returnedCode = regexec(&regex, URL, 4, occurrences, 0);
 
         if(returnedCode)
         {
@@ -341,7 +344,7 @@ http://www.bichito.com313
 
 	if(debug)
 	{
-		printf("URL is %s",URL);
+		printf("URL is %s\n",URL);
 		printf("Total regex: rm_so is %ld and rm_eo is %ld\n",occurrences[0].rm_so,occurrences[0].rm_eo);
 		
 		printf("First capture group rm_so is %ld and rm_eo is %ld\n",occurrences[1].rm_so,occurrences[1].rm_eo);
@@ -352,7 +355,7 @@ http://www.bichito.com313
 
 	//EXTRACT PROTOCOL
 
-	CHECK THAT INDEED THE PROTOCOL WAS EXTRACTED
+	//CHECK THAT INDEED THE PROTOCOL WAS EXTRACTED
 
 	if(occurrences[1].rm_so == -1)
 	{
@@ -378,13 +381,21 @@ http://www.bichito.com313
 	memset(protocol,0,sizeof(protocol));
 	memcpy(protocol,URL+occurrences[1].rm_so,protocolLength);
 
-	if(!strcmp(protocol,http))
+	if(!strcmp(protocol,"http"))
 	{
-		*method = METHOD_NOTSECURE;
+		if(debug)
+		{
+			printf("Protocol is http\n");
+		}
+		*securityMethod = INSECURE_METHOD;
 	}
-	else if(!strcmp(protocol,https))
+	else if(!strcmp(protocol,"https"))
 	{
-		*method = METHOD_SECURE;
+		if(debug)
+		{
+			printf("Protocol is http\n");
+		}
+		*securityMethod = SECURE_METHOD;
 	}
 	else
 	{
@@ -399,7 +410,7 @@ http://www.bichito.com313
 
 	//EXTRACT HOSTNAME
 
-	CHECK THAT WE INDEED CAPTURED THE DESIRED CAPTURE GROUP: WITH OLD REGEX WE CAN CAPTURE ONLY THE HOSTNAME. IN OLD REGEX, CAPTURE INDEX IS 1, BUT IN THE NEW ONE IT IS INDEX 2
+	//CHECK THAT WE INDEED CAPTURED THE DESIRED CAPTURE GROUP: WITH OLD REGEX WE CAN CAPTURE ONLY THE HOSTNAME. IN OLD REGEX, CAPTURE INDEX IS 1, BUT IN THE NEW ONE IT IS INDEX 2
 
 	if(occurrences[2].rm_so == -1)
 	{
@@ -412,7 +423,14 @@ http://www.bichito.com313
 
 	//Length of hostname
 	//int hostnameLength = occurrences[1].rm_eo-occurrences[1].rm_so;
+
 	int hostnameLength = occurrences[2].rm_eo-occurrences[2].rm_so;
+	if(debug)
+	{
+		printf("Extracting hostname...\n");
+		printf("Hostname start index is %i and stop index is %i\n",occurrences[2].rm_so,occurrences[2].rm_eo);
+		printf("Hostname length is %i\n",hostnameLength);
+	}
 	//Allocate memory for the address. Remember that we need to allocate one extra byt for \0!!!
 	char hostname[hostnameLength+1];
 	hostname[hostnameLength] = 0;
@@ -420,12 +438,21 @@ http://www.bichito.com313
 	//memcpy(hostname,URL+occurrences[1].rm_so,hostnameLength);
 	memcpy(hostname,URL+occurrences[2].rm_so,hostnameLength);
 
+	if(debug)
+	{
+		printf("Hostname is %s\n",hostname);
+	}
 
 	//EXTRACT PORT NUMBER
 	int portNumber = 0;
-	CHECK THAT INDEED THE PORTNUMBER WAS EXTRACTED
+	//CHECK THAT INDEED THE PORTNUMBER WAS EXTRACTED
 	if(occurrences[3].rm_so != -1)
 	{
+		if(debug)
+		{
+			printf("Port number specified, extracting port number...\n");
+		}
+
 		//Length of portnumber
 		int portNumberLength = occurrences[3].rm_eo-(occurrences[3].rm_so+1);//We do not want the ":" character
 
@@ -438,10 +465,21 @@ http://www.bichito.com313
 			return -1;
 		}
 
+		if(debug)
+		{
+			printf("Portnumber start index is %i and stop index is %i\n",occurrences[3].rm_so,occurrences[3].rm_eo);
+			printf("Portnumber length is %i\n",portNumberLength);
+		}
+
 		char portNumberString[6];
 		memset(portNumberString,0,sizeof(portNumberString));
 		memcpy(portNumberString,URL+occurrences[3].rm_so+1,portNumberLength);
 
+		if(debug)
+		{
+			printf("Portnumber string is %s\n",portNumberString);
+
+		}
 
 		portNumber = atoi(portNumberString);
 		if(portNumber > 65535)
@@ -455,6 +493,11 @@ http://www.bichito.com313
 	}
 	else
 	{
+		if(debug)
+		{
+			printf("No port number specified. Using default port numbers...\n");
+		}
+
 		if(strcmp(protocol,"http"))
 		{
 			portNumber = 80;
@@ -477,7 +520,7 @@ http://www.bichito.com313
 
 	struct addrinfo* IPAddress;
 
-	resolveError = getaddrinfo(hostname, NULL, NULL, &IPAddress);
+	int resolveError = getaddrinfo(hostname, NULL, NULL, &IPAddress);
     
 	if(resolveError)
 	{
@@ -485,7 +528,7 @@ http://www.bichito.com313
 		{
 			printf("Cannot resolve hostname %s!!\n",hostname);
 		}
-    	}
+	}
 	else
 	{
 		if(debug)
@@ -494,17 +537,18 @@ http://www.bichito.com313
 		}
 	}
 
-	
+	struct sockaddr_in *IPAddress4;
+	struct sockaddr_in6 *IPAddress6;
 	if(portNumber > 0)
 	{
-		if(IPAddress -> sa_family == AF_INET)
+		if(IPAddress -> ai_family == AF_INET)
 		{
-			struct sockaddr_in *IPAddress4 = (struct sockaddr_in *) IPAddress;
+			IPAddress4 = (struct sockaddr_in *) IPAddress -> ai_addr;
 			IPAddress4 -> sin_port = htons(portNumber);
 		}
-		else if(IPAddress -> sa_family == AF_INET6)
+		else if(IPAddress -> ai_family == AF_INET6)
 		{
-			struct sockaddr_in6 *IPAddress6 = (struct sockaddr_in *) IPAddress;
+			IPAddress6 = (struct sockaddr_in6 *) IPAddress -> ai_addr;
 			IPAddress6 -> sin6_port = htons(portNumber);
 		}
 	}
@@ -515,5 +559,9 @@ http://www.bichito.com313
 	
 	memcpy(socketInfo,IPAddress->ai_addr,sizeof(struct sockaddr));
 
+	if(debug)
+	{
+		printf("Function extractSocketInfoFromURL finished sucessfully, returning...\n");
+	}
 	return 0;
 }

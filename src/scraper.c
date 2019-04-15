@@ -190,7 +190,7 @@ void freeBTCAddressesArray(char **btcAddressArray, int arrayLength)
 	return;
 
 	//Free each of the array components
-	for(int i = 0; i < arrayLength ; i**)
+	for(int i = 0; i < arrayLength ; i++)
 	{
 		free(btcAddressArray[i]);
 	}
