@@ -44,3 +44,6 @@ int readFromServer(SecureSocket *secureSocket, char *data, int dataLength);
 //Function to extract IP Address from URL
 int extractSocketInfoFromURL(struct sockaddr *socketInfo, int *securityMethod, char *URL, int debug);
 
+//Function to extract the path part from an http URL
+int extractPathFromURL(char *URL, char *path, int maxPathLength, int debug);
+

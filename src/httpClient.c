@@ -1,7 +1,11 @@
 #include "httpClient.h"
 
 //Function to Request an HTTP/HTTPS webpage
-char *requestPage(char *URL);
+char *requestPage(char *URL)
+{
+
+	return NULL;
+}
 
 //Function to obtain a socket
 
@@ -291,12 +295,17 @@ https://www.bichito.com313/hola
 http://www.bichito.com313/hola
 http://www.bichito.com313/
 http://www.bichito.com313
+http://www.bichito-bueno.com:343/hola/loquesea
+https://www.bichito-malo.com:3434/ruta/MAYUSCULAS
+
 
 
 
 */
 
 	//char regexPattern[] = "http[s]*://(.*)/";
+	//THERE COULD BE HYPENS IN THE HOSTNAME, UPDATE REGEX!!!
+	//ESCAPE / WITH \\/, SINCE / IS A DELIMITER
 	char regexPattern[] = "(http|https)://([a-zA-Z\\.0-9]+)(:[0-9]+)*[\\/]*";
 	//Otro patrón para cazar números de puerto: (http|https):\/\/([a-zA-Z\.0-9]+)(:[0-9]+)*[\/]*
 	//Quitando las secuencias de escape para las "/" queda: (http|https)://([a-zA-Z\.0-9]+)(:[0-9]+)*[/]*
@@ -563,5 +572,109 @@ http://www.bichito.com313
 	{
 		printf("Function extractSocketInfoFromURL finished sucessfully, returning...\n");
 	}
+
+	freeaddrinfo(IPAddress);
 	return 0;
+}
+
+int extractPathFromURL(char *URL, char *path, int maxPathLength, int debug)
+{
+
+	//THERE COULD BE HYPENS IN THE HOSTNAME, UPDATE REGEX!!!
+	//"http[s]{0,1}:\/\/[a-zA-Z\\.0-9:]+(\/*.*)"
+	//"http[s]{0,1}:\/\/[a-zA-Z\\.0-9]+[:0-9]*(\/*.*)" //BETTER
+
+	//THERE COULD BE HYPENS IN THE HOSTNAME, UPDATE REGEX!!!
+	//ESCAPE / WITH \\/, SINCE / IS A DELIMITER
+	char regexPattern[] = "http[s]{0,1}:\\/\\/[a-zA-Z\\.0-9]+[:0-9]*(\\/*.*)"; //BETTER
+
+	int returnedCode = 0;
+
+	//Compile the regex
+	regex_t regex;
+	returnedCode = regcomp(&regex,regexPattern,REG_EXTENDED);
+	if (returnedCode)
+	{
+		if(debug)
+		{
+		    printf(stderr, "Cannot compile URL regex!!\n");
+		}
+		return -1;
+	}
+	else
+	{
+		if(debug)
+		{
+		    printf("URL Regex compilation returned SUCCESS!!\n");
+		}
+	}
+	//Structure to store occurrences of the regex
+	regmatch_t occurrences[2];
+
+	//Find a coincidences with the regex
+	returnedCode = regexec(&regex, URL, 2, occurrences, 0);
+
+    if(returnedCode)
+    {
+        if(debug)
+        {
+            printf("Returned Code is %i\n", returnedCode);
+
+
+		    int errorMessageLength = 1000;
+		    char errorMessage[errorMessageLength];
+		    regerror(returnedCode, &regex, errorMessage, errorMessageLength);
+
+	        printf("ERROR MESSAGE IS %s\n", errorMessage);
+        }
+	    return -1;
+    }
+
+	if(occurrences[0].rm_so == -1)
+	{
+		if(debug)
+		{
+			printf("Could not match regex correctly\n");
+		}
+		return -1;
+	}
+
+	if(occurrences[1].rm_so == -1)
+	{
+		if(maxPathLength < 2)
+		{
+			if(debug)
+			{
+				printf("Result bufferSize is %i, required buffer size is 2, it is not enough\n",maxPathLength);
+			}
+			return -2; //Insufficient buffer size
+		}
+
+		if(debug)
+		{
+			printf("No path found, extracting default path: /\n");
+		}
+		strncpy(path,"/",2);
+	}
+
+	PRINT STARTING AND ENDING INDEXES HERE
+
+	int capturedPathLength = occurrences[1].rm_eo - occurrences[1].rm_so;
+
+	//We need space in the buffer for the total path and for the terminating null (\0) character
+	if(capturedPathLength+1 > maxPathLength)
+	{
+		if(debug)
+		{
+				printf("Result bufferSize is %i, required buffer size is %i, it is not enough\n",maxPathLength,capturedPathLength+1);
+		}
+		return -2; //Insufficient buffer size
+	}
+
+	//By using pathLength+1, we will make strncpy to add a \0 character at the end of the string in "path"
+	strncpy(path,URL+occurrences[1].rm_so,capturedPathLength+1);
+
+	return 0;
+
+
 }

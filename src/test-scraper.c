@@ -20,6 +20,7 @@ int main(int argc, char ** argv)
 
 	struct sockaddr socketInfo;
 	int method = 0;
+	//char URL[]="https://www.google.es:443/algo/loquesea/esunpath";
 	char URL[]="https://www.google.es:443";
 	int extractResult = extractSocketInfoFromURL(&socketInfo, &method, URL, debug);
 
@@ -32,6 +33,21 @@ int main(int argc, char ** argv)
 		return -1;
 	}
 
+
+	int urlResult = 0;
+	int pathBufferSize = 10000;
+	char pathBuffer[pathBufferSize];
+	
+	urlResult = extractPathFromURL(URL, pathBuffer, pathBufferSize, 1);
+
+	if(urlResult < 0)
+	{
+		printf("Could not extract path from URL, return code is %i\n",urlResult);
+		exit(-1);
+	}
+
+	printf("Extracted path is %s\n",pathBuffer);
+	exit(0);
     int resultLength = 0;
     int resultCode = 0;
 
