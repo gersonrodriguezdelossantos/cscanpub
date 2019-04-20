@@ -21,7 +21,10 @@ int main(int argc, char ** argv)
 	struct sockaddr socketInfo;
 	int method = 0;
 	//char URL[]="https://www.google.es:443/algo/loquesea/esunpath";
-	char URL[]="https://www.google.es:443";
+	//char URL[]="https://www.google.es:443";
+	//char URL[]="https://www.google.es:443/";
+	char URL[]="https://www.blockchain.com/btc/popular-addresses";
+
 	int extractResult = extractSocketInfoFromURL(&socketInfo, &method, URL, debug);
 
 	if(extractResult)
@@ -47,12 +50,12 @@ int main(int argc, char ** argv)
 	}
 
 	printf("Extracted path is %s\n",pathBuffer);
-	exit(0);
+
     int resultLength = 0;
     int resultCode = 0;
 
 
- SecureSocket *secureSocket;
+	SecureSocket *secureSocket;
 
 	secureSocket = openSecureSocket(method, &socketInfo);
 
@@ -63,8 +66,13 @@ int main(int argc, char ** argv)
 	}
 
 	//SACAR LA PARTE DE RUTA DE LA URL DE LA DIRECCIÓN
-	char httpRequest [] = "GET /\r\n\r\n";
+	char httpRequest[pathBufferSize+8];
+	sprintf(httpRequest,"GET %s\r\n\r\n",pathBuffer);
+	printf("Request string is %s\n", httpRequest);
+	printf("Request string length is %i\n",strlen(httpRequest));
+	printf("Writing to server...\n");
 	int writeResult = writeToServer(secureSocket, httpRequest,strlen(httpRequest));
+	printf("Ended writing to server...\n");
 
 	if(writeResult < strlen(httpRequest))
 	{
@@ -76,6 +84,7 @@ int main(int argc, char ** argv)
 	char *readData=calloc(totalBufferSpace,1); //Take \0 into account since we are reading a string
 	int readResultLength = 0;
 	int totalReadBytes = 0;
+	printf("Starting read process from server...\n");
 	do
 	{
 		printf("Reading from server...\n");

@@ -191,12 +191,24 @@ int writeToServer(SecureSocket *secureSocket, char *data, int dataLength)
         return -1;
     }
 
+	printf("SecureSocket pointer is %p\n",secureSocket);
+	printf("SecureSocket TCP socket number is %i\n",secureSocket -> tcpSocket);
+	printf("SecureSocket SSL pointer is %p\n",secureSocket -> ssl);
+	printf("Data buffer has length %i and dataLength parameter is %i\n",strlen(data),dataLength);
+	printf("Buffer content is:\n#%s#\n",data);
+	fflush(stdout);
+
     int bytesWritten = 0;
     if(secureSocket -> ssl && secureSocket -> tcpSocket > -1)
     {
+		printf("Writing bytes to socket...\n");
+		fflush(stdout);
         bytesWritten = SSL_write(secureSocket -> ssl, data, dataLength);
+		printf("Written bytes to socket...\n");
+		fflush(stdout);
         if (bytesWritten < 0)
         {
+			printf("Error during write operation to server, return code is %i\n",bytesWritten);
             int sslError = SSL_get_error(secureSocket -> ssl, bytesWritten);
             switch (sslError)
             {
@@ -213,6 +225,7 @@ int writeToServer(SecureSocket *secureSocket, char *data, int dataLength)
                     return -1;
             }
         }
+		printf("Wrote %i bytes to server\n",bytesWritten);
     }
     else if(secureSocket -> tcpSocket > -1)
     {
@@ -586,6 +599,13 @@ int extractPathFromURL(char *URL, char *path, int maxPathLength, int debug)
 
 	//THERE COULD BE HYPENS IN THE HOSTNAME, UPDATE REGEX!!!
 	//ESCAPE / WITH \\/, SINCE / IS A DELIMITER
+
+	if(debug)
+	{
+		printf("URL is %s\n",URL);
+		printf("URL length is %i\n",strlen(URL));
+	}
+
 	char regexPattern[] = "http[s]{0,1}:\\/\\/[a-zA-Z\\.0-9]+[:0-9]*(\\/*.*)"; //BETTER
 
 	int returnedCode = 0;
@@ -639,7 +659,12 @@ int extractPathFromURL(char *URL, char *path, int maxPathLength, int debug)
 		return -1;
 	}
 
-	if(occurrences[1].rm_so == -1)
+	if(debug)
+	{
+		printf("Path start index is %i and stop index is %i\n",occurrences[1].rm_so,occurrences[1].rm_eo);
+	}
+
+	if(occurrences[1].rm_so == -1 || occurrences[1].rm_so == strlen(URL))
 	{
 		if(maxPathLength < 2)
 		{
@@ -655,9 +680,8 @@ int extractPathFromURL(char *URL, char *path, int maxPathLength, int debug)
 			printf("No path found, extracting default path: /\n");
 		}
 		strncpy(path,"/",2);
+		return 0;
 	}
-
-	PRINT STARTING AND ENDING INDEXES HERE
 
 	int capturedPathLength = occurrences[1].rm_eo - occurrences[1].rm_so;
 
