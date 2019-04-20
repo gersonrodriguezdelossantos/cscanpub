@@ -143,6 +143,7 @@ int negotiateSecureSession(SecureSocket *secureSocket)
 
 
 
+
 //Function to close a socket
 int closeSecureSocket(SecureSocket *secureSocket)
 {

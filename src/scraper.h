@@ -4,3 +4,4 @@ void freeBTCAddressesArray(char **btcAddressArray, int arrayLength);
 
 
 
+

@@ -47,3 +47,4 @@ int extractSocketInfoFromURL(struct sockaddr *socketInfo, int *securityMethod, c
 //Function to extract the path part from an http URL
 int extractPathFromURL(char *URL, char *path, int maxPathLength, int debug);
 
+

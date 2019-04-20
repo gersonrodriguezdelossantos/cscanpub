@@ -74,6 +74,7 @@ int main(int argc, char ** argv)
 	int writeResult = writeToServer(secureSocket, httpRequest,strlen(httpRequest));
 	printf("Ended writing to server...\n");
 
+
 	if(writeResult < strlen(httpRequest))
 	{
 		//VER SI ESTE ERROR REALMENTE SE PUEDE DAR.
