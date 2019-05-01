@@ -10,7 +10,7 @@ int main(int argc, char ** argv)
 
 	int debug = 1;
 
-    char test[]="1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2,3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy,bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq,,d";
+    //char test[]="1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2,3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy,bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq,,d";
 
 
 
@@ -22,8 +22,12 @@ int main(int argc, char ** argv)
 	int method = 0;
 	//char URL[]="https://www.google.es:443/algo/loquesea/esunpath";
 	//char URL[]="https://www.google.es:443";
-	//char URL[]="https://www.google.es:443/";
+	//char URL[]="https://www.google.es/";
+	//char URL[]="https://www.meneame.net/";
+	//char URL[]="https://www.microsoft.com/";
+
 	char URL[]="https://www.blockchain.com/btc/popular-addresses";
+	//char URL[]="https://www.blockchain.com";
 
 	int extractResult = extractSocketInfoFromURL(&socketInfo, &method, URL, debug);
 
@@ -38,7 +42,7 @@ int main(int argc, char ** argv)
 
 
 	int urlResult = 0;
-	int pathBufferSize = 10000;
+	int pathBufferSize = 1000;
 	char pathBuffer[pathBufferSize];
 	
 	urlResult = extractPathFromURL(URL, pathBuffer, pathBufferSize, 1);
@@ -66,10 +70,12 @@ int main(int argc, char ** argv)
 	}
 
 	//SACAR LA PARTE DE RUTA DE LA URL DE LA DIRECCIÓN
-	char httpRequest[pathBufferSize+8];
-	sprintf(httpRequest,"GET %s\r\n\r\n",pathBuffer);
+	char httpRequest[pathBufferSize+17];
+	//sprintf(httpRequest,"GET %s HTTP/1.1\r\n\r\n",pathBuffer);
+	//strcpy(httpRequest, "GET /btc/popular-addresses\r\n\r\n");	
+	strcpy(httpRequest, "GET /btc/popular-addresses HTTP/1.1\nHost: www.blockchain.com\r\n\r\n");	
 	printf("Request string is %s\n", httpRequest);
-	printf("Request string length is %i\n",strlen(httpRequest));
+	printf("Request string length is %li\n",strlen(httpRequest));
 	printf("Writing to server...\n");
 	int writeResult = writeToServer(secureSocket, httpRequest,strlen(httpRequest));
 	printf("Ended writing to server...\n");
@@ -91,6 +97,7 @@ int main(int argc, char ** argv)
 		printf("Reading from server...\n");
 		readResultLength = readFromServer(secureSocket, readData + totalReadBytes, maxDataLength);
 		printf("Reading from server returned...\n");
+		printf("Read %i bytes\n",readResultLength);
 		if(readResultLength < 0)
 		{
 			free(readData);
@@ -99,25 +106,30 @@ int main(int argc, char ** argv)
 		
 		totalReadBytes += readResultLength;
 
-		if(totalReadBytes == maxDataLength)
+		if(totalReadBytes >= totalBufferSpace)
 		{
-			totalBufferSpace += maxDataLength;
+			printf("Total Read bytes is %i\n",totalReadBytes);			
+			totalBufferSpace = totalReadBytes + maxDataLength;
+			printf("Next size for realloc is %i\n",totalBufferSpace);
 			readData = realloc(readData,totalBufferSpace);
+			printf("Reallocated for %i buffer space\n",totalBufferSpace);
 			if(!readData)
 			{
 				return -1;
 			}
 		}
+	//printf("%s\n",readData);
 	}
-	while(readResultLength == maxDataLength);
+	while(readResultLength > 100); PONER OTRA CONDICION DE PARADA
 
-	closeSecureSocket(secureSocket);
-
+	printf("Total read bytes is %i\n",totalReadBytes);
+fflush(stdout);
 	readData[totalReadBytes] = '\0'; //End the string with the null character. Remember we allocated
-	
+	printf("Total string size of read data is %li\n",strlen(readData));
+fflush(stdout);
 
-	printf("Printing web server response\n");
-	printf("\n\n\n%s\n\n\n",readData);
+	//printf("Printing web server response\n");
+	//printf("\n\n\n%s\n\n\n",readData);
 
 
 	//char **returnedValues = scrapBTCAddresses(test,&resultLength,&resultCode,0);
@@ -133,8 +145,9 @@ int main(int argc, char ** argv)
         printf("%s\n",returnedValues[i]);
     }
 
-	free(readData);
-	freeBTCAddressesArray(returnedValues, resultLength);
+//	closeSecureSocket(secureSocket);
+//	free(readData);
+//	freeBTCAddressesArray(returnedValues, resultLength);
 	    
 
 

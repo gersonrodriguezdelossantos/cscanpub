@@ -195,7 +195,7 @@ int writeToServer(SecureSocket *secureSocket, char *data, int dataLength)
 	printf("SecureSocket pointer is %p\n",secureSocket);
 	printf("SecureSocket TCP socket number is %i\n",secureSocket -> tcpSocket);
 	printf("SecureSocket SSL pointer is %p\n",secureSocket -> ssl);
-	printf("Data buffer has length %i and dataLength parameter is %i\n",strlen(data),dataLength);
+	printf("Data buffer has length %li and dataLength parameter is %i\n",strlen(data),dataLength);
 	printf("Buffer content is:\n#%s#\n",data);
 	fflush(stdout);
 
@@ -332,7 +332,7 @@ https://www.bichito-malo.com:3434/ruta/MAYUSCULAS
 	{
 		if(debug)
 		{
-		    printf(stderr, "Cannot compile URL regex!!\n");
+		    printf("Cannot compile URL regex!!\n");
 		}
 		return -1;
 	}
@@ -368,9 +368,9 @@ https://www.bichito-malo.com:3434/ruta/MAYUSCULAS
 	if(debug)
 	{
 		printf("URL is %s\n",URL);
-		printf("Total regex: rm_so is %ld and rm_eo is %ld\n",occurrences[0].rm_so,occurrences[0].rm_eo);
+		printf("Total regex: rm_so is %d and rm_eo is %d\n",occurrences[0].rm_so,occurrences[0].rm_eo);
 		
-		printf("First capture group rm_so is %ld and rm_eo is %ld\n",occurrences[1].rm_so,occurrences[1].rm_eo);
+		printf("First capture group rm_so is %d and rm_eo is %d\n",occurrences[1].rm_so,occurrences[1].rm_eo);
 
 
 	}
@@ -521,13 +521,15 @@ https://www.bichito-malo.com:3434/ruta/MAYUSCULAS
 			printf("No port number specified. Using default port numbers...\n");
 		}
 
-		if(strcmp(protocol,"http"))
+		if(!strcmp(protocol,"http"))
 		{
 			portNumber = 80;
+			printf("Protocol is http, using port 80.\n");
 		}
-		else if(strcmp(protocol,"https"))
+		else if(!strcmp(protocol,"https"))
 		{
 			portNumber = 443;
+			printf("Protocol is https, using port 443.\n");
 		}
 		else
 		{
@@ -604,7 +606,7 @@ int extractPathFromURL(char *URL, char *path, int maxPathLength, int debug)
 	if(debug)
 	{
 		printf("URL is %s\n",URL);
-		printf("URL length is %i\n",strlen(URL));
+		printf("URL length is %ld\n",strlen(URL));
 	}
 
 	char regexPattern[] = "http[s]{0,1}:\\/\\/[a-zA-Z\\.0-9]+[:0-9]*(\\/*.*)"; //BETTER
@@ -618,7 +620,7 @@ int extractPathFromURL(char *URL, char *path, int maxPathLength, int debug)
 	{
 		if(debug)
 		{
-		    printf(stderr, "Cannot compile URL regex!!\n");
+		    printf("Cannot compile URL regex!!\n");
 		}
 		return -1;
 	}
