@@ -98,7 +98,8 @@ char **scrapBTCAddresses(char *text, int *resultLength, int *resultCode, int deb
             //If there is a match, then we copy the string
             if(debug)
             {
-                printf("rm_so is %i and rm_eo is %i\n",occurrences.rm_so,occurrences.rm_eo);
+
+                printf("rm_so is %ld and rm_eo is %ld\n",occurrences.rm_so,occurrences.rm_eo);
                 printf("Match goes from index %ld to index %ld\n", currentPosition-text+occurrences.rm_so, currentPosition-text+occurrences.rm_eo-1);
             }
 
@@ -184,6 +185,7 @@ char **scrapBTCAddresses(char *text, int *resultLength, int *resultCode, int deb
 }
 
 
+
 //Function to free the resources allocated to create a BTC Address array
 void freeBTCAddressesArray(char **btcAddressArray, int arrayLength)
 {
@@ -199,7 +201,6 @@ void freeBTCAddressesArray(char **btcAddressArray, int arrayLength)
 	//Free the array itself
 	free(btcAddressArray);
 }
-
 
 
 
